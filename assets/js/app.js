@@ -1,6 +1,6 @@
 /* Dom7 */
 var $$ = Dom7;
-$mainUrl = "http://localhost/smollan-api/api/";
+$mainUrl = "http://dev.bean.co.ke/smollan-api/api/";
 /* Theme */
 var theme = 'auto';
 if (document.location.search.indexOf('theme=') >= 0) {
