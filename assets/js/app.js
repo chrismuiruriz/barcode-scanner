@@ -1,6 +1,6 @@
 /* Dom7 */
 var $$ = Dom7;
-$mainUrl = "http://myschoolchart.com/unileverbe/rest/";
+$mainUrl = "http://localhost/smollan-api/api/";
 /* Theme */
 var theme = 'auto';
 if (document.location.search.indexOf('theme=') >= 0) {
@@ -33,24 +33,54 @@ var mainView = app.view.create(".view-main");
 /* pageInit is only called once */
 app.on('pageInit', function (e) {
     var pageName = e.name;
-    if (pageName === "home") {
+    if (pageName !== "login") {
+        if (!localStorage.login) {
+            mainView.router.load({url: "./pages/login-page.html", ignoreCache: true, reload: true});
+        }
+    } else if (pageName === "login") {
+        if (localStorage.login) {
+            mainView.router.load({url: "./index.html", ignoreCache: true, reload: true});
+        }
     }
 });
 app.on("pageBeforeIn", function (e) {
     $(".panel-right").removeClass("opacity-none");
     $(".panel-backdrop").removeClass("opacity-none");
     var pageName = e.name;
-    if (pageName === "home") {
+    if (pageName === "login") {
+        if (localStorage.login) {
+            mainView.router.load({url: "index.html", ignoreCache: true, reload: true});
+        }
+    } else if (pageName === "cooler-details") {
+        coolerDetailsFunctions(e);
     }
 });
-/* set up home page */
-var setUpHomePage = function () {
 
+/* set cooler details page */
+var coolerDetailsFunctions = function (pageData) {
+    if ($.isEmptyObject(pageData.route.params)) {
+        var queryParams = pageData.route.query;
+    } else {
+        var queryParams = pageData.route.params;
+    }
+    var $url = "./pages/cooler-details.html?id=" + obj.ID + "&serial=" + obj.serial + "&name=" + obj.name + "&location=" + obj.location + "&img=" + obj.image + "&contacts=" + obj.contacts + "&status=1";
+    var coolerID = queryParams.id;
+    var serial = queryParams.serial;
+    var name = queryParams.name;
+    var location = queryParams.location;
+    var image = queryParams.image;
+    var contacts = queryParams.contacts;
+
+    $("data-cooler=['serial']").html(coolerID);
+    $("data-cooler=['name']").html(name);
+    $("data-cooler=['location']").html(location);
+    $("data-cooler=['img']").html("src", image);
 };
+
 /* update profile name */
 $$('#main-panel').on('panel:open', function () {
     if (localStorage.userFirstName) {
-        $("[data-modal='panelUserFullName']").html(localStorage.userFirstName + " " + localStorage.userLastName);
+        $("[data-modal='panelUserFullName']").html(localStorage.name);
     }
 });
 /* login interface */
@@ -66,8 +96,29 @@ $("body").on("submit", "#login-form", function (e) {
             closeTimeout: 2000
         }).open();
         return;
+    } else {
+        var urlApi = $mainUrl + 'login.php';
+        app.request.post(urlApi, {email: $email, password: $password}, function (response, status, xhr) {
+            app.dialog.close();
+            if (response.status === "SUCCESS") {
+                var obj = JSON.parse(response.data);
+                localStorage.login = "true";
+                localStorage.id = obj.ID;
+                localStorage.name = obj.name;
+                localStorage.email = obj.email;
+                console.log(response.data);
+                app.dialog.alert(response.message, null, function () {
+                    mainView.router.load({url: "./index.html", ignoreCache: true, reload: true});
+                });
+            } else {
+                app.dialog.alert(response.message, null);
+            }
+        }, function (xhr, status) {
+            app.dialog.close();
+            app.dialog.alert("Connection Error! Check your internet connection and try again.!", null);
+        }, "json");
+
     }
-    mainView.router.load({url: "./index.html", ignoreCache: true, reload: true});
 });
 
 /* scan QR form */
@@ -75,23 +126,36 @@ $("body").on("submit", "#scan-qr-form", function (e) {
     e.preventDefault();
     cordova.plugins.barcodeScanner.scan(
             function (result) {
-                alert("We got a barcode\n" +
-                        "Result: " + result.text + "\n" +
-                        "Format: " + result.format + "\n" +
-                        "Cancelled: " + result.cancelled);
+                var urlApi = $mainUrl + 'get_cooler.php';
+                app.request.post(urlApi, {code: result.text}, function (response, status, xhr) {
+                    app.dialog.close();
+                    if (response.status === "SUCCESS") {
+                        var obj = JSON.parse(response.data);
+                        console.log(response.data);
+                        app.dialog.alert(response.message, null, function () {
+                            var $url = "./pages/cooler-details.html?id=" + obj.ID + "&serial=" + obj.serial + "&name=" + obj.name + "&location=" + obj.location + "&img=" + obj.image + "&contacts=" + obj.contacts + "&status=1";
+                            mainView.router.load({url: $url, ignoreCache: true, reload: true});
+                        });
+                    } else {
+                        app.dialog.alert(response.message, null);
+                    }
+                }, function (xhr, status) {
+                    app.dialog.close();
+                    app.dialog.alert("Connection Error! Check your internet connection and try again.!", null);
+                }, "json");
             },
             function (error) {
                 alert("Scanning failed: " + error);
             },
             {
-                preferFrontCamera: false, // iOS and Android
-                showFlipCameraButton: true, // iOS and Android
-                showTorchButton: true, // iOS and Android
-                torchOn: false, // Android, launch with the torch switched on (if available)
-                prompt: "Place a the QR Code inside the scan area", // Android
-                resultDisplayDuration: 500, // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
-                orientation: "landscape", // Android only (portrait|landscape), default unset so it rotates with the device
-                disableAnimations: true // iOS
+                preferFrontCamera: false,
+                showFlipCameraButton: true,
+                showTorchButton: true,
+                torchOn: false,
+                prompt: "Place a the QR Code inside the scan area",
+                resultDisplayDuration: 500,
+                orientation: "portrait",
+                disableAnimations: true
             }
     );
     // mainView.router.load({url: "./pages/cooler-details.html", ignoreCache: true, reload: true});
