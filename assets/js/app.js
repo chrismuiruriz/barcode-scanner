@@ -63,7 +63,6 @@ var coolerDetailsFunctions = function (pageData) {
     } else {
         var queryParams = pageData.route.params;
     }
-    var $url = "./pages/cooler-details.html?id=" + obj.ID + "&serial=" + obj.serial + "&name=" + obj.name + "&location=" + obj.location + "&img=" + obj.image + "&contacts=" + obj.contacts + "&status=1";
     var coolerID = queryParams.id;
     var serial = queryParams.serial;
     var name = queryParams.name;
