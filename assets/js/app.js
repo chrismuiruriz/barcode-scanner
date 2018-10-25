@@ -22,6 +22,7 @@ var app = new Framework7({
     },
     routes: routes
 });
+
 var $$ = app.$;
 /* make sure the app only runs on mobile devices */
 if (app.device.desktop) {
@@ -43,6 +44,7 @@ app.on('pageInit', function (e) {
         }
     }
 });
+
 app.on("pageBeforeIn", function (e) {
     $(".panel-right").removeClass("opacity-none");
     $(".panel-backdrop").removeClass("opacity-none");
@@ -53,8 +55,40 @@ app.on("pageBeforeIn", function (e) {
         }
     } else if (pageName === "cooler-details") {
         coolerDetailsFunctions(e);
+    } else if (pageName === "records") {
+        recordsFunctions(e);
     }
 });
+
+/* set records page */
+var recordsFunctions = function (pageData) {
+    app.preloader.show('Loading...');
+    var serviceApi = $mainUrl + 'get_records.php';
+    app.request.post(serviceApi, {user: localStorage.id, appid: "123"}, function (response, status, xhr) {
+        app.preloader.hide();
+        console.log("data", response.data);
+        if (response.status === "SUCCESS") {
+            var recordData = JSON.parse(response.data);
+            $$("#table-data").empty();
+            for (var i = 0; i < recordData.length; i++) {
+                var trow = '<tr>' +
+                        '<td>' + recordData[i]["date_time"] + '</td>' +
+                        '<td>' + recordData[i]["cooler"] + '</td>' +
+                        '<td>' + recordData[i]["location"] + '</td>' +
+                        '<td>' + recordData[i]["user_name"] + '</td>' +
+                        '<td>' + recordData[i]["feedback"] + '</td>' +
+                        '</tr>';
+                $("#table-data").append(trow);
+            }
+        } else {
+            app.dialog.alert(response.message, null);
+        }
+    }, function (xhr, status) {
+        app.preloader.hide();
+        console.log("Error", xhr);
+        app.dialog.alert("Connection Error! Check your internet connection and try again!", null);
+    }, "json");
+};
 
 /* set cooler details page */
 var coolerDetailsFunctions = function (pageData) {
@@ -64,7 +98,7 @@ var coolerDetailsFunctions = function (pageData) {
         var queryParams = pageData.route.params;
     }
     var code = queryParams.code;
-
+    $("#serial_no").val(code);
     var urlApi = $mainUrl + 'get_cooler.php';
     app.dialog.preloader('...');
     app.request.post(urlApi, {code: code}, function (response, status, xhr) {
@@ -134,6 +168,17 @@ $("body").on("submit", "#login-form", function (e) {
 /* scan QR form */
 $("body").on("submit", "#scan-qr-form", function (e) {
     e.preventDefault();
+
+    if (typeof cordova == 'undefined') {
+        var t = "353982886721734";
+        var msg = "QR CODE " + t;
+        app.dialog.alert(msg, null, function () {
+            var $url = "./pages/cooler-details.html?code=" + t + "&serial=1";
+            mainView.router.load({url: $url, ignoreCache: true, reload: true});
+        });
+        return;
+    }
+
     cordova.plugins.barcodeScanner.scan(
             function (result) {
                 var msg = "QR CODE " + result.text;
@@ -205,7 +250,7 @@ var questionPopup = app.popup.create({
             ' <div class="item-inner">' +
             '<div class="item-title item-label">Comment</div>' +
             ' <div class="item-input-wrap">' +
-            ' <textarea name="comment" placeholder="Your comment" rows="4"></textarea>' +
+            ' <textarea name="comment" id="comment" placeholder="Your comment" rows="4"></textarea>' +
             ' </div>' +
             ' </div>' +
             ' </div>' +
@@ -232,6 +277,47 @@ $("body").on("click", "#get-quiz-details", function () {
 /* on quiz submitted */
 $("body").on("submit", "#quiz-form", function (e) {
     e.preventDefault();
+
+    var quizData = new Object();
+    var quiz1 = $("[name='sheaves-aligned']");
+    var quiz2 = $("[name='cooler-odorless']");
+    var quiz3 = $("[name='stemp-below-10']");
+    if (!quiz1.is(":checked")) {
+        quizData.quiz1 = "YES";
+    } else {
+        quizData.quiz1 = "NO";
+    }
+    if (!quiz2.is(":checked")) {
+        quizData.quiz2 = "YES";
+    } else {
+        quizData.quiz2 = "NO";
+    }
+    if (!quiz3.is(":checked")) {
+        quizData.quiz3 = "YES";
+    } else {
+        quizData.quiz3 = "NO";
+    }
+    quizData.comment = $("[name='comment']").val();
+    var strQuizData = JSON.stringify(quizData);
+    var serial = $("#serial_no").val();
+    var location = $("[data-cooler='location']").html();
+
+    var urlApi = $mainUrl + 'save_records.php';
+    app.dialog.preloader('...');
+    app.request.post(urlApi, {quizData: strQuizData, cooler: serial, loc: location, userId: localStorage.id, userName: localStorage.name}, function (response, status, xhr) {
+        app.dialog.close();
+        if (response.status === "SUCCESS") {
+            app.dialog.alert(response.message, null, function () {
+                questionPopup.close();
+                mainView.router.load({url: "./index.html", ignoreCache: true, reload: true});
+            });
+        } else {
+            app.dialog.alert(response.message, null);
+        }
+    }, function (xhr, status) {
+        app.dialog.close();
+        app.dialog.alert("Connection Error! Check your internet connection and try again.!", null);
+    }, "json");
 });
 
 /* initialize framework7 */

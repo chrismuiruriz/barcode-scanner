@@ -25,6 +25,11 @@ var routes = [
         name: 'cooler-details'
     },
     {
+        path: '/records/',
+        url: './pages/records.html',
+        name: 'records'
+    },
+    {
         path: '/store-status/:id/:name/:location/',
         url: './pages/store-status.html',
         name: 'store-status'
