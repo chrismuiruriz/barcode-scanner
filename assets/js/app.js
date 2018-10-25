@@ -72,10 +72,11 @@ var coolerDetailsFunctions = function (pageData) {
         if (response.status === "SUCCESS") {
             var obj = JSON.parse(response.data);
             console.log(response.data);
-            $("data-cooler=['serial']").html(obj.ID);
-            $("data-cooler=['name']").html(obj.name);
-            $("data-cooler=['location']").html(obj.location);
-            $("data-cooler=['img']").html("src", obj.image);
+            $("[data-cooler='serial']").html(obj.serial);
+            $("[data-cooler='name']").html(obj.name);
+            $("[data-cooler='location']").html(obj.location);
+            $("[data-cooler='img']").attr("src", obj.image);
+            console.log("Image", obj.image);
         } else {
             app.dialog.alert(response.message, null);
         }
@@ -83,7 +84,6 @@ var coolerDetailsFunctions = function (pageData) {
         app.dialog.close();
         app.dialog.alert("Connection Error! Check your internet connection and try again.!", null);
     }, "json");
-
 };
 
 /* update profile name */
