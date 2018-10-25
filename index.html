@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1,width=device-width, height=device-height, target-densitydpi=device-dpi" />
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="theme-color" content="#7D1754">
+        <title>SMOLLAN DEMO</title>
+        <link rel="stylesheet" href="assets/css/framework7.css">
+        <link rel="stylesheet" href="assets/css/app.css">
+        <link rel="stylesheet" href="assets/css/solvit.css">
+    </head>
+    <body class="color-theme-purple">
+        <div id="app">
+            <div class="statusbar"></div>
+            <div class="panel panel-left panel-cover" id="main-panel">
+                <div class="content-block">
+                    <div class="panel-header">
+                        <div class="profile-container">
+                            <img src="./assets/img/default.jpeg" class="panel-img" />
+                            <h4 class="panel-title" data-modal="panelUserFullName"></h4>
+                        </div>
+                    </div>
+                    <div class="list links-list">
+                        <ul>
+                            <li>
+                                <a href="#" class="panel-close">Capture</a>
+                            </li>
+                            <li>
+                                <a href="#" class="panel-close">Records</a>
+                            </li>
+                            <li>
+                                <a href="#" class="panel-close">My Profile</a>
+                            </li>
+                            <li>
+                                <a href="#" class="panel-close">Help</a>
+                            </li>
+                            <li>
+                                <a href="#" class="panel-close">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="view view-main">
+                <div data-name="home" class="page">
+
+                    <!-- Top Navbar -->
+                    <div class="navbar">
+                        <div class="navbar-inner">
+                            <div class="left">
+                                <a href="#" class="link icon-only panel-open" data-panel="left">
+                                    <i class="icon f7-icons ios-only">menu</i>
+                                    <i class="icon material-icons md-only">menu</i>
+                                </a>
+                            </div>
+                            <div class="title">SMOLLAN DEMO</div>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable page content -->
+                    <div class="page-content">
+
+                        <div class="list main-list">
+                            <ul>
+                                <li>
+                                    <a href="/login/" class="item-link item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">Capture</div>
+                                            <div class="item-subtitle">Lorem ipsum dolor sit amet, consecte</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/capture/" class="item-link item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">Records</div>
+                                            <div class="item-subtitle">Lorem ipsum dolor sit amet, consecte</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">My Profile</div>
+                                            <div class="item-subtitle">View your profile details</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">Help</div>
+                                            <div class="item-subtitle">Communicate &amp; get support</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Path to Framework7 Library JS-->
+        <script src="cordova.js"></script>
+        <script type="text/javascript" src="assets/js/index.js"></script>
+        <script type="text/javascript">
+            phonegapApp.initialize();
+        </script>
+        <script type="text/javascript" src="assets/js/framework7.min.js"></script>
+        <script type="text/javascript" src="assets/js/jquery.min.js"></script>
+        <script type="text/javascript" src="assets/js/routes.js"></script>
+
+        <script type="text/javascript" src="assets/js/app.js"></script>
+    </body>
+</html>
