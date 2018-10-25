@@ -63,17 +63,27 @@ var coolerDetailsFunctions = function (pageData) {
     } else {
         var queryParams = pageData.route.params;
     }
-    var coolerID = queryParams.id;
-    var serial = queryParams.serial;
-    var name = queryParams.name;
-    var location = queryParams.location;
-    var image = queryParams.image;
-    var contacts = queryParams.contacts;
+    var code = queryParams.code;
 
-    $("data-cooler=['serial']").html(coolerID);
-    $("data-cooler=['name']").html(name);
-    $("data-cooler=['location']").html(location);
-    $("data-cooler=['img']").html("src", image);
+    var urlApi = $mainUrl + 'get_cooler.php';
+    app.dialog.preloader('...');
+    app.request.post(urlApi, {code: code}, function (response, status, xhr) {
+        app.dialog.close();
+        if (response.status === "SUCCESS") {
+            var obj = JSON.parse(response.data);
+            console.log(response.data);
+            $("data-cooler=['serial']").html(obj.ID);
+            $("data-cooler=['name']").html(obj.name);
+            $("data-cooler=['location']").html(obj.location);
+            $("data-cooler=['img']").html("src", obj.image);
+        } else {
+            app.dialog.alert(response.message, null);
+        }
+    }, function (xhr, status) {
+        app.dialog.close();
+        app.dialog.alert("Connection Error! Check your internet connection and try again.!", null);
+    }, "json");
+
 };
 
 /* update profile name */
@@ -82,6 +92,7 @@ $$('#main-panel').on('panel:open', function () {
         $("[data-modal='panelUserFullName']").html(localStorage.name);
     }
 });
+
 /* login interface */
 $("body").on("submit", "#login-form", function (e) {
     e.preventDefault();
@@ -125,23 +136,11 @@ $("body").on("submit", "#scan-qr-form", function (e) {
     e.preventDefault();
     cordova.plugins.barcodeScanner.scan(
             function (result) {
-                var urlApi = $mainUrl + 'get_cooler.php';
-                app.request.post(urlApi, {code: result.text}, function (response, status, xhr) {
-                    app.dialog.close();
-                    if (response.status === "SUCCESS") {
-                        var obj = JSON.parse(response.data);
-                        console.log(response.data);
-                        app.dialog.alert(response.message, null, function () {
-                            var $url = "./pages/cooler-details.html?id=" + obj.ID + "&serial=" + obj.serial + "&name=" + obj.name + "&location=" + obj.location + "&img=" + obj.image + "&contacts=" + obj.contacts + "&status=1";
-                            mainView.router.load({url: $url, ignoreCache: true, reload: true});
-                        });
-                    } else {
-                        app.dialog.alert(response.message, null);
-                    }
-                }, function (xhr, status) {
-                    app.dialog.close();
-                    app.dialog.alert("Connection Error! Check your internet connection and try again.!", null);
-                }, "json");
+                var msg = "QR CODE " + result.text;
+                app.dialog.alert(msg, null, function () {
+                    var $url = "./pages/cooler-details.html?code=" + result.text + "&serial=1";
+                    mainView.router.load({url: $url, ignoreCache: true, reload: true});
+                });
             },
             function (error) {
                 alert("Scanning failed: " + error);
@@ -157,7 +156,6 @@ $("body").on("submit", "#scan-qr-form", function (e) {
                 disableAnimations: true
             }
     );
-    // mainView.router.load({url: "./pages/cooler-details.html", ignoreCache: true, reload: true});
 });
 
 /* get quiz from server */
